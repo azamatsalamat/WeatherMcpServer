@@ -24,7 +24,7 @@ public class WeatherProvider: IWeatherProvider
         var response = result.Value;
         var description = response.Weather[0].Description;
         var temp = response.MainInfo.Temp;
-        return $"The weather in {city} is {description} with a temperature of {temp}°C.";
+        return $"The current weather in {city} is {description} with a temperature of {temp}°C.";
     }
 
     public async Task<Result<string>> GetWeatherForecastAsync(string city, string? country, int days)
@@ -54,8 +54,8 @@ public class WeatherProvider: IWeatherProvider
 
         var forecastSummary = string.Join("\n", grouped.Select(day =>
             $"{day.Date:yyyy-MM-dd}: {day.Description}, Max temp: {day.MaxTemp:F1}°C, Min temp: {day.MinTemp:F1}°C"));
-
-        return $"Weather forecast for {city} for the next {days} days:\n{forecastSummary}";
+        
+        return $"Weather forecast for {city} for the next {days} days:\n{forecastSummary}.";
     }
 
     public async Task<Result<string>> GetWeatherAlertsAsync(string city, string? country = null)
@@ -68,8 +68,7 @@ public class WeatherProvider: IWeatherProvider
         }
 
         var alerts = string.Join("\n", result.Value.Select(a => 
-            $"{a.Event} from {DateTimeOffset.FromUnixTimeSeconds(a.Start):yyyy-MM-dd HH:mm} to {DateTimeOffset.FromUnixTimeSeconds(a.End):yyyy-MM-dd HH:mm}."));
-        _logger.LogInformation($"Weather alerts for {city}:\n{alerts}");
-        return $"Weather alerts for {city}:\n{alerts}";
+            $"{a.Event} from {DateTimeOffset.FromUnixTimeSeconds(a.Start):yyyy-MM-dd HH:mm} to {DateTimeOffset.FromUnixTimeSeconds(a.End):yyyy-MM-dd HH:mm}"));
+        return $"Weather alerts for {city}:\n{alerts}.";
     }
 }
