@@ -1,17 +1,31 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .WriteTo.Console()
+    .WriteTo.File("logs/mcp-logs.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
+    .CreateLogger();
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// Configure all logs to go to stderr (stdout is used for the MCP protocol messages).
-builder.Logging.AddConsole(o => o.LogToStandardErrorThreshold = LogLevel.Trace);
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(Log.Logger);
 
-// Add the MCP services: the transport to use (stdio) and the tools to register.
+
+builder.Services.AddSingleton(sp =>
+{
+    var logger = sp.GetRequiredService<ILogger<OpenWeatherMapConfig>>();
+    return new OpenWeatherMapConfig(logger);
+});
+builder.Services.AddSingleton<IWeatherClient, OpenWeatherClient>();
+builder.Services.AddSingleton<IWeatherProvider, WeatherProvider>();
+
 builder.Services
     .AddMcpServer()
     .WithStdioServerTransport()
-    .WithTools<RandomNumberTools>()
     .WithTools<WeatherTools>();
 
 await builder.Build().RunAsync();
