@@ -9,8 +9,9 @@ obj/
 *.sln.docstates
 logs/
 
-# VS Code settings
+# Editor settings
 .vscode/
+.cursor/
 
 # NuGet packages
 *.nupkg
